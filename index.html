@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>직업훈련교강사 역량진단</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            padding-top: 120px;
+        }
+        .survey-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding-bottom: 60px;
+        }
+        .rating-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        .rating-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .rating-circle {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #4CAF50;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .rating-circle.selected {
+            background-color: #4CAF50;
+        }
+        .rating-label {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 5px;
+        }
+ .progress-container {
+        width: 100%;
+        background-color: #e0e0e0;
+        border-radius: 5px;
+        margin-top: 20px;
+    }
+    .progress-bar {
+        height: 10px;
+        background-color: #4CAF50;
+        border-radius: 5px;
+        transition: width 0.5s ease-in-out;
+    }
+    #sub-category-progress-bar {
+        background-color: #2196F3;
+    }
+
+        .progress-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .progress-bar {
+            width: 0%;
+            height: 10px;
+            background-color: #4CAF50;
+            border-radius: 5px;
+            transition: width 0.5s ease-in-out;
+        }
+        .fixed-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: white;
+            padding: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .category-container {
+            display: flex;
+            flex-direction: column;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .main-category {
+            text-align: left;
+            font-weight: bold;
+        }
+        .sub-category {
+            text-align: right;
+            margin-top: 5px;
+        }
+        .main-title {
+            margin-top: 20px;
+            text-align: center;
+
+        }
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .question-item {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+        .question-item.answered {
+            background-color: #f0fff4;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="fixed-header">
+        <div class="category-container">
+            <h1 class="main-title text-2xl font-bold mb-6 text-blue-600">직업훈련교강사 역량진단</h1>
+
+        </div>
+    </div>
+
+    <div class="survey-container p-6 bg-white shadow-md rounded-lg">
+        <span id="main-category" class="main-category text-lg"></span>
+        <br>
+        <span id="sub-category" class="sub-category text-lg"></span>
+        <div id="question-container" class="space-y-6">
+            <!-- 질문들이 여기에 동적으로 추가됩니다 -->
+        </div>
+        <div class="navigation-buttons">
+            <button id="prev-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l">
+                이전
+            </button>
+            <button id="next-btn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-r">
+                다음
+            </button>
+        </div>
+     	<div class="progress-container mt-6">
+    		<p id="sub-category-progress" class="text-center mb-2 text-sm text-gray-600"></p>
+	    	<div id="sub-category-progress-bar" class="progress-bar mb-4"></div>
+    		<p id="total-progress" class="text-center mb-2 text-sm text-gray-600"></p>
+    		<div id="total-progress-bar" class="progress-bar"></div>
+	</div>
+        <p id="progress-text" class="text-center mt-2 text-sm text-gray-600"></p>
+        <button id="submit-btn" class="mt-6 w-full bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline hidden">
+            제출하기
+        </button>
+    </div>
+
+    <script>
+        // CSV 데이터를 직접 JavaScript 변수로 포함
+        const csvData = `대영역,세부역량,행동지표,매우낮음,낮음,보통,높음,매우높음
+기본 역량(1/5),직업훈련 이해 및 정책변화 대응(1/6),나는 직업능력개발훈련의 목적과 가치를 이해하고 국가가 수립하는 장·단기 계획 및 정책을 기반으로 직업능력개발훈련사업이 전개되는 논리를 이해한다.,,,,,
+기본 역량(1/5),직업훈련 이해 및 정책변화 대응(1/6),"나는 직업능력개발훈련의 목적을 달성하기 위한 국가, 지방자치단체, 사업주, 근로자 등의 책무를 이해한다.",,,,,
+기본 역량(1/5),직업훈련 이해 및 정책변화 대응(1/6),"나는 ""국민 평생 직업능력 개발법""에 기반한 직업능력개발훈련사업이 추구하는 가치와 목적을 사례를 들어 설명한다.",,,,,
+기본 역량(1/5),직업훈련 이해 및 정책변화 대응(1/6),"나는 직업능력개발훈련사업의 유형과 목표, 실행방법, 실행기관 및 이를 지원하기 위한 행정, 재정적 체계를 이해한다.",,,,,
+기본 역량(1/5),직업훈련 이해 및 정책변화 대응(1/6),나는 기관의 비전 설정 및 달성을 위하여 어떠한 새로운 직업능력개발훈련 정책을 활용할 수 있는지 파악한다.,,,,,
+기본 역량(1/5),직업훈련 이해 및 정책변화 대응(1/6),나는 직업능력개발훈련 정책변화를 파악할 수 있는 다양한 경로를 확보하고 활용한다.,,,,,
+기본 역량(1/5),직업훈련교사의 사명감(2/6),나는 직업능력개발훈련의 중요성과 필요성을 알고 있다.,,,,,
+기본 역량(1/5),직업훈련교사의 사명감(2/6),나는 직업능력개발훈련교사로서의 사명과 역할을 인식하고 있다.,,,,,
+기본 역량(1/5),직업훈련교사의 사명감(2/6),나는 직업능력개발훈련교사로서의 업무에 보람과 긍지를 가진다.,,,,,
+기본 역량(1/5),직업훈련교사의 사명감(2/6),"나는 훈련생의 지식, 기술, 태도 변화 등의 능력 육성자로서 가치관을 가지고 행동한다.",,,,,
+기본 역량(1/5),직업훈련교사의 사명감(2/6),"나는 훈련생의 지식, 기술, 태도 변화 등의 능력 육성자로서 윤리의식을 가지고 행동한다.",,,,,
+기본 역량(1/5),직업훈련교사로서의 자기개발(3/6),"나는 교수자로서 개인에게 필요한 역량(교수방법, 훈련지도 등)을 파악하고 개선하기 위해 지속적으로 노력한다.",,,,,
+기본 역량(1/5),직업훈련교사로서의 자기개발(3/6),"나는 교수자(직업능력개발 훈련교사, NCS 확인강사 등)로서의 자격을 유지하기 위해 노력한다.",,,,,
+기본 역량(1/5),직업훈련교사로서의 자기개발(3/6),"나는 교수자(직업능력개발 훈련교사, NCS 확인강사 등)로서의 새로운 자격 취득을 위해 노력한다.",,,,,
+기본 역량(1/5),직업훈련교사로서의 자기개발(3/6),"나는 기술 전공분야 및 산업 분야의 연수(현장경험), 포럼, 세미나 등에 주기적으로 참여해 최신 기술 및 산업동향을 파악한다.",,,,,
+기본 역량(1/5),직업훈련교사로서의 자기개발(3/6),나는 기술 전공분야의 새로운 자격을 취득하기 위해 노력한다.,,,,,
+기본 역량(1/5),직업훈련교사로서의 자기개발(3/6),"나는 대학, 대학원 등 진학을 통해 최신 기술의 흐름을 반영한다.",,,,,
+기본 역량(1/5),의사소통(4/6),나는 훈련생과 교직원들에게 말하고자 하는 의도에 적합하게 의사를 표현한다.,,,,,
+기본 역량(1/5),의사소통(4/6),"나는 훈련생과 교직원들과 상황에 적합한 언어적·비언어적(표정, 제스처, 시선주기 등) 상징을 적절히 조합하여 소통한다.",,,,,
+기본 역량(1/5),의사소통(4/6),나는 훈련생과 교직원들에게 내 의사 표현이 정확하게 전달될 수 있도록 다시 설명하거나 요약한다.,,,,,
+기본 역량(1/5),의사소통(4/6),나는 내 의사표현에 대한 훈련생과 교직원들의 이해 여부 확인을 위해 적절한 질문을 한다.,,,,,
+기본 역량(1/5),의사소통(4/6),상대가 말하고자 하는 의도를 정확하게 이해하려고 경청한다.,,,,,
+기본 역량(1/5),문제해결(5/6),나는 직업훈련 교·강사 업무 수행 과정에서 객관적 자료를 토대로 문제의 원인과 결과를 논리적으로 파악한다.,,,,,
+기본 역량(1/5),문제해결(5/6),나는 직업훈련 교·강사 업무 수행 과정에서 다양하게 발생하는 문제를 우선순위에 따라 유연하게 대처한다.,,,,,
+기본 역량(1/5),문제해결(5/6),나는 직업훈련 교·강사 업무 수행 중 다양한 가능성을 찾아 적절한 대안을 도출한다.,,,,,
+기본 역량(1/5),문제해결(5/6),나는 직업훈련 교·강사 업무 수행 중 문제해결에 활용된 대안들의 현실성을 검토한다.,,,,,
+기본 역량(1/5),문제해결(5/6),나는 직업훈련 교·강사 업무 수행 과정에서 문제가 재발하지 않도록 예방 절차를 수립한다.,,,,,
+기본 역량(1/5),AI·디지털 이해와 활용(6/6),"나는 다양한 경로(웹 검색, 전자신문, 동영상 콘텐츠 등)를 통해 직업훈련 교·강사 업무와 관련한 AI·디지털 기술(컴퓨터, 스마트폰, 응용 S/W 등)의 최신 동향을 파악한다.",,,,,
+기본 역량(1/5),AI·디지털 이해와 활용(6/6),"나는 직업능력개발훈련 교·강사 업무에서 AI·디지털 기술(컴퓨터, 스마트폰, 응용 S/W, SNS 등)의 기능과 영향을 이해한다.",,,,,
+기본 역량(1/5),AI·디지털 이해와 활용(6/6),"나는 직업능력개발훈련 교·강사 업무 목적에 맞게 디지털 AI·기술(컴퓨터, 스마트폰, 응용 S/W, SNS 등)을 선택하고 활용한다.",,,,,
+기본 역량(1/5),AI·디지털 이해와 활용(6/6),"나는 AI·디지털 자원(전자문서, 데이터, 콘텐츠 등)을 직업능력개발훈련 교·강사 업무 목적에 맞게 탐색하거나 수집한다.",,,,,
+기본 역량(1/5),AI·디지털 이해와 활용(6/6),"나는 AI·디지털 자원(전자문서, 데이터, 콘텐츠 등)을 직업능력개발훈련 교·강사 업무 목적에 맞게 수정하거나 편집한다.",,,,,
+기본 역량(1/5),AI·디지털 이해와 활용(6/6),"나는 AI·디지털 기술(컴퓨터, 스마트폰, 응용 S/W, SNS 등)을 활용하여 직업능력개발훈련 관련 새로운 AI·디지털 자원(전자문서, 데이터, 콘텐츠 등)을 개발한다.",,,,,
+교수학습평가역량(2/5),훈련과정 설계 및 개발(1/7),나는 교육훈련 과정 설계 및 개발을 위해 산업체·훈련생의 훈련 요구사항과 환경변화(직종별 정책 등)를 조사하여 분석한다.,,,,,
+교수학습평가역량(2/5),훈련과정 설계 및 개발(1/7),나는 요구조사 결과와 훈련생의 요구사항을 바탕으로 새로운 훈련과정 개발 여부를 결정한다.,,,,,
+교수학습평가역량(2/5),훈련과정 설계 및 개발(1/7),나는 다양한 교수학습 방법과 효과를 분석하여 훈련과정에 적용한다.,,,,,
+교수학습평가역량(2/5),훈련과정 설계 및 개발(1/7),나는 교육훈련 과정과 관련된 산업체의 특성을 반영하여 훈련과정을 개발한다.,,,,,
+교수학습평가역량(2/5),훈련과정 설계 및 개발(1/7),나는 훈련 프로그램 개발 프로세스를 토대로 훈련과정을 개발한다.,,,,,
+교수학습평가역량(2/5),수업 설계 및 교수(2/7),나는 국가직무능력표준을 기반으로 훈련생에게 요구되는 직무역량을 훈련목표 및 수업목표에 반영한다.,,,,,
+교수학습평가역량(2/5),수업 설계 및 교수(2/7),"나는 훈련분야의 특성과 훈련목표, 훈련내용, 훈련생 특성을 고려하여 수업계획안을 작성한다.",,,,,
+교수학습평가역량(2/5),수업 설계 및 교수(2/7),"나는 훈련분야의 특성과 훈련목표, 훈련내용, 훈련생 특성을 고려하여 교육훈련방법을 결정한다.",,,,,
+교수학습평가역량(2/5),수업 설계 및 교수(2/7),"나는 훈련분야의 특성과 훈련목표, 훈련내용, 훈련생 특성을 고려하여 적합한 교육훈련내용을 선정한다.",,,,,
+교수학습평가역량(2/5),수업 설계 및 교수(2/7),"나는 훈련분야의 특성과 훈련목표, 훈련내용, 훈련생 특성을 고려하여 적합한 교수매체(교재, 교구재, 과제) 등을 활용한다.",,,,,
+교수학습평가역량(2/5),수업 설계 및 교수(2/7),나는 요구조사를 반영하여 세부 수업계획안을 수정 및 보완한다.,,,,,
+교수학습평가역량(2/5),수업 설계 및 교수(2/7),"나는 훈련에 사용되는 교수매체(교재, 교구재, 과제 등), 실습기기·도구, 재료 등을 미리 준비하고 점검한다.",,,,,
+교수학습평가역량(2/5),수업 설계 및 교수(2/7),나는 수업 중 훈련생의 학습활동 참여를 촉진하기 위해 수업상황에 적절한 피드백을 제공한다.,,,,,
+교수학습평가역량(2/5),수업 설계 및 교수(2/7),"나는 훈련생에게 학습한 것을 발표, 설명하게 하여 지식/기술/태도의 습득과정을 관찰한다.",,,,,
+교수학습평가역량(2/5),수업 설계 및 교수(2/7),나는 훈련과정에서 상호보완 가능한 특성을 가진 훈련생 간의 팀 또는 그룹을 구성하여 운영한다.,,,,,
+교수학습평가역량(2/5),수업 설계 및 교수(2/7),나는 훈련생의 훈련 과정에서 관찰되는 개선 요구사항을 훈련에 반영한다.,,,,,
+교수학습평가역량(2/5),수업 설계 및 교수(2/7),나는 훈련 프로그램 종료 후 프로그램을 평가하여 다음 프로그램 개발에 적용한다.,,,,,
+교수학습평가역량(2/5),AI·디지털 활용 교수 역량(3/7),"나는 AI·디지털 기술(컴퓨터, 스마트폰, 응용 S/W 등)을 활용하여 교수매체(전자문서, 영상콘텐츠 등)를 개발한다.",,,,,
+교수학습평가역량(2/5),AI·디지털 활용 교수 역량(3/7),"나는 AI·디지털 기술(컴퓨터, 스마트폰, 응용 S/W, 등)을 활용하여 훈련생이 수행해야 할 과제를 개발한다.",,,,,
+교수학습평가역량(2/5),AI·디지털 활용 교수 역량(3/7),"나는 훈련생들이 학습과정에서 AI·디지털 기술(컴퓨터, 스마트폰, 응용 S/W, LMS 등)을 활용하도록 기회를 제공한다.",,,,,
+교수학습평가역량(2/5),AI·디지털 활용 교수 역량(3/7),"나는 AI·디지털 기술(컴퓨터, 스마트폰, 응용 S/W, LMS, 메타버스, 화상회의 솔류션 등)을 활용하여 수업을 설계하고 강의를 진행한다.",,,,,
+교수학습평가역량(2/5),AI·디지털 활용 교수 역량(3/7),"나는 AI·디지털 기술(화상회의 솔루션, 메타버스, LMS 등)을 활용하여 새로운 교육훈련 방법을 적용한다.",,,,,
+교수학습평가역량(2/5),AI·디지털 활용 교수 역량(3/7),"나는 AI·디지털 기술(컴퓨터, 스마트폰, 응용 S/W, LMS 등)을 활용하여 평가에 대한 훈련생의 질의, 상담 등에 대한 피드백을 제공한다.",,,,,
+교수학습평가역량(2/5),AI·디지털 활용 교수 역량(3/7),"나는 AI·디지털 기술(컴퓨터, 스마트폰, 응용 S/W, LMS 등)을 활용하여 훈련생별 훈련 평가 데이터를 분석한다.",,,,,
+교수학습평가역량(2/5),교육훈련 방법(4/7),나는 최근 산업현장에서 요구하는 능력 개발에 적합한 다양한 교육훈련 방법을 적용한다,,,,,
+교수학습평가역량(2/5),교육훈련 방법(4/7),"나는 교육훈련 방법을 개발할 때, 교육훈련 방법 개발에 필요한 전문지식을 활용한다.",,,,,
+교수학습평가역량(2/5),교육훈련 방법(4/7),나는 전공분야의 현장경험을 반영한 효과적인 교육훈련방법을 개발한다.,,,,,
+교수학습평가역량(2/5),교육훈련 방법(4/7),나는 교육훈련 시간에 다양한 교육훈련 방법을 시도하여 강의한다.,,,,,
+교수학습평가역량(2/5),교육훈련 방법(4/7),나는 타 기관의 훈련운영 사례를 참고하여 교육훈련방법을 적용한다.,,,,,
+교수학습평가역량(2/5),교육훈련 방법(4/7),"나는 훈련생들의 주도적 과업수행능력과 실무능력 함양을 위해 산업체 공동 프로젝트, 그룹프로젝트, 개인별 프로젝트 등 자기주도적 학습활동을 촉진한다",,,,,
+교수학습평가역량(2/5),교육훈련자료 개발 및 활용(5/7),"나는 훈련생 특성과 훈련목표에 적합한 교수매체(교재, 교구재, 과제 등)를 제작하거나 구매하여 활용한다.",,,,,
+교수학습평가역량(2/5),교육훈련자료 개발 및 활용(5/7),"나는 교수매체(교재, 교구재, 과제 등)를 구성할 때 구체적인 내용으로 구성한다.",,,,,
+교수학습평가역량(2/5),교육훈련자료 개발 및 활용(5/7),"나는 교수매체(교재, 교구재, 과제 등)를 구성할 때 문법에 맞는 구별된 언어와 전문용어를 사용한다.",,,,,
+교수학습평가역량(2/5),훈련생 평가 및 피드백(6/7),"나는 인터뷰 및 사전 설문, 평가 등을 통해 훈련생의 학습능력을 훈련과정 전에 파악한다.",,,,,
+교수학습평가역량(2/5),훈련생 평가 및 피드백(6/7),나는 훈련생에게 훈련목표 달성을 위한 평가기준을 안내한다.,,,,,
+교수학습평가역량(2/5),훈련생 평가 및 피드백(6/7),나는 훈련생 평가에 적합한 평가방법을 활용한다.,,,,,
+교수학습평가역량(2/5),훈련생 평가 및 피드백(6/7),나는 훈련생 평가에 적합한 피드백 기법을 활용한다.,,,,,
+교수학습평가역량(2/5),훈련생 평가 및 피드백(6/7),"나는 학습목표에 적합한 평가(포트폴리오, 문제해결 시나리오, 서술형시험, 작업장평가 등)를 선택하여 적용한다.",,,,,
+교수학습평가역량(2/5),훈련생 평가 및 피드백(6/7),나는 훈련생의 역량 개발에 필요한 교육훈련 프로그램에 관한 정보를 수집하여 피드백을 제공한다.,,,,,
+교수학습평가역량(2/5),훈련생 평가 및 피드백(6/7),나는 훈련생의 평가 결과를 다음의 훈련 프로그램 또는 수업의 개선을 위해 활용한다.,,,,,
+교수학습평가역량(2/5),훈련과정 성과평가 및 관리(7/7),나는 훈련과정 운영 목적에 따른 평가 목적과 목표를 알고 있다.,,,,,
+교수학습평가역량(2/5),훈련과정 성과평가 및 관리(7/7),나는 훈련과정 운영에 투입된 자원의 효과성과 효율성을 평가한다.,,,,,
+교수학습평가역량(2/5),훈련과정 성과평가 및 관리(7/7),나는 훈련과정 평가자료를 분석하고 결과를 해석하여 정리한다.,,,,,
+교수학습평가역량(2/5),훈련과정 성과평가 및 관리(7/7),"나는 훈련평가 관련 이론과 지식, 방법을 파악하여 필요에 따라 다양하게 응용한다.",,,,,
+교수학습평가역량(2/5),훈련과정 성과평가 및 관리(7/7),나는 평가기준을 토대로 훈련 후 과정별 자체 평가를 실시한다.,,,,,
+교수학습평가역량(2/5),훈련과정 성과평가 및 관리(7/7),나는 훈련 종료 후 훈련생들을 대상으로 훈련 만족도 평가를 실시하여 문제점을 파악하고 개선점을 차기 훈련에 반영한다.,,,,,
+교수학습평가역량(2/5),훈련과정 성과평가 및 관리(7/7),나는 훈련 만족도 평가와 훈련과정 평가 결과를 반영하여 다음 훈련과정의 운영개선 방안을 작성한다.,,,,,
+훈련생 지원역량(3/5),훈련생 수료지원(1/3),나는 훈련생 선발에 훈련과정 목적과 훈련생의 취업 의지를 고려한다.,,,,,
+훈련생 지원역량(3/5),훈련생 수료지원(1/3),나는 훈련생들의 지속적인 훈련 참여를 위하여 출결을 관리하며 동기유발한다.,,,,,
+훈련생 지원역량(3/5),훈련생 수료지원(1/3),나는 훈련생들의 성취에 대하여 격려한다.,,,,,
+훈련생 지원역량(3/5),훈련생 수료지원(1/3),"나는 AI·디지털 기술(컴퓨터, 스마트폰, 응용 S/W, LMS 등)을 활용하여 훈련생의 진도, 학습 상태 등을 모니터링 한다.",,,,,
+훈련생 지원역량(3/5),훈련생 수료지원(1/3),나는 훈련생들의 동기부여를 위한 훈련 보상 방법 등을 활용한다.,,,,,
+훈련생 지원역량(3/5),훈련생 이해 및 상담(2/3),"나는 인터뷰 및 사전 설문, 평가 등을 통해 훈련생의 훈련 배경(교육경험, 교육환경, 선호도 등)을 파악한다.",,,,,
+훈련생 지원역량(3/5),훈련생 이해 및 상담(2/3),"나는 훈련생과 정기 및 수시로 일대일 면담, 소그룹 미팅 등을 통해 훈련생의 훈련 적응도를 파악한다.",,,,,
+훈련생 지원역량(3/5),훈련생 이해 및 상담(2/3),"나는 훈련생들의 훈련 고충 및 건의사항 수렴을 위한 다양한 경로의 장치(건의함, 홈페이지, 인터넷 카페 운영, 만족도조사 등)를 운영한다.",,,,,
+훈련생 지원역량(3/5),훈련생 이해 및 상담(2/3),"나는 훈련생과 정기 및 수시로 일대일 면담, 소그룹 미팅 등을 통해 훈련생의 능력 개발에 대해 상담을 실시한다.",,,,,
+훈련생 지원역량(3/5),훈련생 이해 및 상담(2/3),나는 상담을 통해 훈련생의 훈련 과정에서 관찰되는 개선 요구사항을 훈련에 필요시 반영한다.,,,,,
+훈련생 지원역량(3/5),훈련생 이해 및 상담(2/3),"나는 AI·디지털 기술(컴퓨터, 스마트폰, 응용 S/W, LMS 등)을 활용하여 훈련생과의 상담을 진행한다.",,,,,
+훈련생 지원역량(3/5),훈련생 이해 및 상담(2/3),"나는 상담 결과에 따른 후속 조치(상담 사후관리, 개선 여부 확인 등)를 실시한다.",,,,,
+훈련생 지원역량(3/5),취업지원 및 사후지도(3/3),나는 취업지원 관련 부서 및 담당자와 훈련생 취업촉진 지원을 위한 네트워크를 형성한다.,,,,,
+훈련생 지원역량(3/5),취업지원 및 사후지도(3/3),나는 훈련생 및 수료 후 미취업자를 위한 취업지원 상담서비스를 지속적으로 제공한다.,,,,,
+훈련생 지원역량(3/5),취업지원 및 사후지도(3/3),"나는 훈련생 및 수료 후 미취업자에게 관심 산업 분야의 동향과 취업 정보, 유망자격 등의 정보를 제공한다.",,,,,
+훈련생 지원역량(3/5),취업지원 및 사후지도(3/3),"나는 취업지원 관련 부서 및 담당자, 취업처 등과 연계하여 취업알선 업무를 수행한다.",,,,,
+훈련생 지원역량(3/5),취업지원 및 사후지도(3/3),"나는 훈련생 및 수료 후 미취업자에게 취업관련 지도활동(이력서 작성 및 면접, 특강, 설명회 등)을 수행한다",,,,,
+훈련생 지원역량(3/5),취업지원 및 사후지도(3/3),나는 취업 후 사후관리 기간동안 훈련생에게 직무 적응을 위한 상담서비스를 제공한다,,,,,
+훈련생 지원역량(3/5),취업지원 및 사후지도(3/3),나는 훈련 수료생의 취업처와 수행 업무를 파악한다.,,,,,
+행정역량(4/5),일반행정(1/4),"나는 문서관리 규정에 따라 AI·디지털 기술(문서 작성 S/W 등)을 활용하여 문서(계획서, 결과보고서 등)를 작성한다.",,,,,
+행정역량(4/5),일반행정(1/4),"나는 탐색하거나 수집한 AI·디지털 자원(전자문서, 데이터, 콘텐츠 등)을 목적에 따라 분류하고 정리한다.",,,,,
+행정역량(4/5),일반행정(1/4),"나는 AI·디지털 기술(컴퓨터, 스마트폰, 응용 S/W, SNS 등)을 활용하여 상대방과 자료를 발･수신하거나 공유한다.",,,,,
+행정역량(4/5),일반행정(1/4),"나는 문서관리 규정에 따라 문서, 데이터를 관리한다.",,,,,
+행정역량(4/5),일반행정(1/4),"나는 운영 매뉴얼에 의거하여 교육훈련 행정 관련 시스템(HRD-Net, LMS 등)을 활용한다.",,,,,
+행정역량(4/5),안전관리(2/4),나는 훈련시설 및 장비 관련 안전관리 계획을 수립한다.,,,,,
+행정역량(4/5),안전관리(2/4),나는 훈련시설 및 장비 관련 안전수칙에 따라 훈련생의 안전과 관련된 요소들을 점검한다.,,,,,
+행정역량(4/5),안전관리(2/4),나는 훈련시설 및 장비의 특성을 고려하여 사전에 위험요소를 제거한다.,,,,,
+행정역량(4/5),안전관리(2/4),나는 안전사고에 대처하기 위하여 훈련기관에 소속된 모든 인원 대상으로 안전교육을 실시한다.,,,,,
+행정역량(4/5),안전관리(2/4),"나는 재난(화재, 응급, 천재지변 등) 상황 발생 시 안전관리 매뉴얼에 따라 대응한다.",,,,,
+행정역량(4/5),정보보안(3/4),나는 개인정보보호법과 관리 규정에 따라 교육훈련에 필요한 개인정보를 당사자의 동의를 받아서 수집·목적 범위 내로 활용한다.,,,,,
+행정역량(4/5),정보보안(3/4),나는 훈련기관과 관련한 모든 정보보안 유지를 위해 계획을 수립한다.,,,,,
+행정역량(4/5),정보보안(3/4),나는 AI·디지털 기술(상용 S/W 등) 사용 전 라이선스에 위배가 되지 않는지 확인한다.,,,,,
+행정역량(4/5),정보보안(3/4),"나는 개인정보가 포함된 AI·디지털 자원(전자문서, 데이터, 콘텐츠 등)을 암호화하여 저장하거나 외부에 유출되지 않는 안전한 곳에 저장한다.",,,,,
+행정역량(4/5),정보보안(3/4),나는 수립된 정보보안 계획에 따라 훈련기관과 훈련과정 운영에 관련된 정보보안을 수행한다.,,,,,
+행정역량(4/5),정보보안(3/4),"나는 수립된 정보보안 계획에 따라 AI·디지털 자원(전자문서, 데이터, 콘텐츠 등)이 저장되어 있는 디지털 기기(컴퓨터, 스마트폰 등)를 사용하고 관리한다.",,,,,
+행정역량(4/5),정보보안(3/4),"나는 저작권이 있는 AI·디지털 자원(전자문서, 데이터, 콘텐츠 등)을 활용할 때 출처를 표시한다.",,,,,
+행정역량(4/5),훈련장비/시설 운영관리(4/4),나는 NCS 기준에 부합하는 훈련시설(면적당 기준 인원 등) 운영 방향을 계획하여 관리한다.,,,,,
+행정역량(4/5),훈련장비/시설 운영관리(4/4),나는 훈련시설을 운영관리 계획에 따라 훈련에 장애가 발생하지 않도록 운영 및 관리한다.,,,,,
+행정역량(4/5),훈련장비/시설 운영관리(4/4),나는 훈련시설 낙후 등에 따른 시설에 대한 수리 및 보수를 계획하고 관리한다.,,,,,
+행정역량(4/5),훈련장비/시설 운영관리(4/4),나는 NCS 기준에 부합하는 훈련장비(장비당 활용 인원 등) 운영 방향을 계획하여 관리한다.,,,,,
+행정역량(4/5),훈련장비/시설 운영관리(4/4),나는 훈련장비 및 기자재를 운영관리 계획에 따라 훈련에 장애가 발생하지 않도록 운영 및 관리한다.,,,,,
+행정역량(4/5),훈련장비/시설 운영관리(4/4),나는 훈련장비 및 기자재 고장 등에 따른 장비 및 기자재에 대한 수리와 교체를 진행한다.,,,,,
+행정역량(4/5),훈련장비/시설 운영관리(4/4),"나는 AI·디지털 기술(컴퓨터, 응용 S/W 등)을 활용하여 훈련장비/시설의 사용 및 정비 이력 등을 관리한다.",,,,,
+조직관리역량(5/5),비전 제시 능력(1/3),나는 국가 직업능력개발훈련 전개 논리에 적합하게 직업훈련기관의 훈련 운영 계획을 수립한다.,,,,,
+조직관리역량(5/5),비전 제시 능력(1/3),나는 직업능력개발훈련 사업의 목적에 맞게 직업훈련기관의 이해관계자들과 유기적인 관계 속에서 업무를 추진한다.,,,,,
+조직관리역량(5/5),비전 제시 능력(1/3),나는 기관과 관련하여 예상되는 내/외부 환경 변화를 예측한다.,,,,,
+조직관리역량(5/5),비전 제시 능력(1/3),나는 내/외부 환경 변화가 기관에 미칠 영향을 분석한다.,,,,,
+조직관리역량(5/5),비전 제시 능력(1/3),"나는 기관의 목표를 설정하고, 다양한 대안과 정보를 제시한다.",,,,,
+조직관리역량(5/5),비전 제시 능력(1/3),나는 대안들의 장단점과 파급효과를 고려하여 실행우선순위에 따라 인적/물적 자원을 선정한다.,,,,,
+조직관리역량(5/5),비전 제시 능력(1/3),나는 AI·디지털 트렌드를 기관의 비전과 목표에 반영되도록 촉진한다.,,,,,
+조직관리역량(5/5),비전 제시 능력(1/3),나는 급격한 사회∙경제 및 환경변화의 파급효과에 따라 비전과 목표를 수정 반영한다.,,,,,
+조직관리역량(5/5),기관운영 마인드(2/3),나는 기관운영 관련 의사 결정 시 비용 대비 결과의 효과성을 고려한다.,,,,,
+조직관리역량(5/5),기관운영 마인드(2/3),나는 기관의 성과보상 체계를 마련하여 구성원에게 동기를 부여한다.,,,,,
+조직관리역량(5/5),기관운영 마인드(2/3),나는 기관을 효율적으로 운영할 수 있는 적정 수준의 수익과 조직 규모를 유지한다.,,,,,
+조직관리역량(5/5),기관운영 마인드(2/3),"나는 AI·디지털 기술(컴퓨터, 스마트폰, 응용 S/W, ERP 등)을 활용하여 기관의 재무성과를 관리한다.",,,,,
+조직관리역량(5/5),기관운영 마인드(2/3),"나는 AI·디지털 기술(컴퓨터, 스마트폰, 응용 S/W, LMS 등)을 활용하여 기관의 훈련성과(훈련생 취업 및 경력관리 등)를 관리한다.",,,,,
+조직관리역량(5/5),기관운영 마인드(2/3),나는 선택과 집중의 원칙에 따라 훈련기관 전략과의 연계성을 중심으로 재원을 관리한다.,,,,,
+조직관리역량(5/5),기관운영 마인드(2/3),나는 기관 구성원의 업무 체계 개선을 통해 성과를 높일 수 있는 방안을 모색한다.,,,,,
+조직관리역량(5/5),기관운영 마인드(2/3),나는 기관 구성원의 업무 환경을 개선하는 등 구성원의 능력발휘 기회를 제공한다.,,,,,
+조직관리역량(5/5),기관운영 마인드(2/3),"나는 기관 운영 효율성을 위해 조직을 개편하고, 인력을 재배치하는 등 기관을 관리한다.",,,,,
+조직관리역량(5/5),기업 발굴 및 협력(3/3),"나는 산업체, 유관기관 등과 협력체계를 유지하여, 업무 수행에 협조를 요청한다.",,,,,
+조직관리역량(5/5),기업 발굴 및 협력(3/3),"나는 소속기관 외의 산업체, 유관기관 등으로부터 다양한 정보를 획득하여 업무에 반영한다.",,,,,
+조직관리역량(5/5),기업 발굴 및 협력(3/3),나는 산업체와 협력체계를 구축하여 교육훈련과정 개발에 참여시킨다.,,,,,
+조직관리역량(5/5),기업 발굴 및 협력(3/3),나는 효과적인 훈련 수행을 위해 지역 및 산업별 인적·물적 자원을 교류한다.,,,,,
+조직관리역량(5/5),기업 발굴 및 협력(3/3),"나는 훈련 및 취업을 위한 산업체, 유관기관 등의 담당자들과 취업촉진과 지원을 위한 네트워크를 구축한다.",,,,,
+조직관리역량(5/5),기업 발굴 및 협력(3/3),"나는 산업체, 유관기관 등에게 기관의 성장과 지속가능성을 위해 훈련 및 취업 관련 홍보활동을 실시한다.",,,,,
+조직관리역량(5/5),기업 발굴 및 협력(3/3),"나는 산업체, 유관기관 등에게 AI·디지털 기술(컴퓨터, 스마트폰, 응용 S/W, LMS 등)을 활용하여 훈련 및 취업에 대한 온라인 홍보활동(SNS, 홈페이지 등)을 전개한다.",,,,,`;
+
+        let questions = [];
+        let currentSubCategoryIndex = 0;
+        let currentQuestionIndex = 0;
+        let answers = [];
+
+        // CSV 데이터를 파싱하는 함수
+      function parseCSV(csv) {
+    const lines = csv.split('\n');
+    const headers = lines[0].split(',');
+    return lines.slice(1).map(line => {
+        const values = [];
+        let insideQuotes = false;
+        let currentValue = '';
+
+        for (let char of line) {
+            if (char === '"') {
+                insideQuotes = !insideQuotes;
+            } else if (char === ',' && !insideQuotes) {
+                values.push(currentValue.trim());
+                currentValue = '';
+            } else {
+                currentValue += char;
+            }
+        }
+        values.push(currentValue.trim());
+
+        return headers.reduce((obj, header, index) => {
+            obj[header.trim()] = values[index] || '';
+            return obj;
+        }, {});
+    });
+}
+
+        // 질문을 그룹화하는 함수
+        function groupQuestions(parsedData) {
+            const grouped = {};
+            parsedData.forEach(item => {
+                if (!grouped[item.세부역량]) {
+                    grouped[item.세부역량] = [];
+                }
+                grouped[item.세부역량].push(item);
+            });
+            return Object.values(grouped);
+        }
+
+        // 질문을 표시하는 함수
+	function displayQuestions(showAll = false) {
+    const questionContainer = document.getElementById('question-container');
+    const currentSubCategory = questions[currentSubCategoryIndex];
+
+    document.getElementById('main-category').textContent = currentSubCategory[0].대영역;
+    document.getElementById('sub-category').textContent = currentSubCategory[0].세부역량;
+
+    questionContainer.innerHTML = '';
+    currentSubCategory.forEach((question, index) => {
+        const questionElement = document.createElement('div');
+        questionElement.className = `question-item ${showAll || index <= currentQuestionIndex ? '' : 'hidden'}`;
+        questionElement.innerHTML = `
+            <p class="mb-2 font-semibold">${question.행동지표}</p>
+            <div class="rating-container" id="rating-${currentSubCategoryIndex}-${index}">
+                <div class="rating-option">
+                    <div class="rating-circle" data-value="1"></div>
+                    <span class="rating-label">매우낮음</span>
+                </div>
+                <div class="rating-option">
+                    <div class="rating-circle" data-value="2"></div>
+                    <span class="rating-label">낮음</span>
+                </div>
+                <div class="rating-option">
+                    <div class="rating-circle" data-value="3"></div>
+                    <span class="rating-label">보통</span>
+                </div>
+                <div class="rating-option">
+                    <div class="rating-circle" data-value="4"></div>
+                    <span class="rating-label">높음</span>
+                </div>
+                <div class="rating-option">
+                    <div class="rating-circle" data-value="5"></div>
+                    <span class="rating-label">매우높음</span>
+                </div>
+            </div>
+        `;
+        questionContainer.appendChild(questionElement);
+
+        const ratingContainer = questionElement.querySelector(`#rating-${currentSubCategoryIndex}-${index}`);
+        ratingContainer.addEventListener('click', (event) => handleRatingClick(event, index));
+
+
+        // 이미 답변한 문항에 대해 선택된 값 표시
+ if (answers[currentSubCategoryIndex] && answers[currentSubCategoryIndex][index]) {
+            const selectedValue = answers[currentSubCategoryIndex][index];
+            const selectedCircle = ratingContainer.querySelector(`.rating-circle[data-value="${selectedValue}"]`);
+            selectedCircle.classList.add('selected');
+            questionElement.classList.add('answered');
+        }
+    });
+
+    updateNavButtons();
+    updateProgress();
+}
+
+function handleRatingClick(event, questionIndex) {
+    if (event.target.classList.contains('rating-circle')) {
+        const circles = event.currentTarget.querySelectorAll('.rating-circle');
+        circles.forEach(circle => circle.classList.remove('selected'));
+        event.target.classList.add('selected');
+
+        const value = parseInt(event.target.dataset.value);
+        answers[currentSubCategoryIndex] = answers[currentSubCategoryIndex] || [];
+        answers[currentSubCategoryIndex][questionIndex] = value;
+
+        event.currentTarget.closest('.question-item').classList.add('answered');
+
+        if (questionIndex === currentQuestionIndex && questionIndex < questions[currentSubCategoryIndex].length - 1) {
+            currentQuestionIndex++;
+            const nextQuestion = document.querySelector(`.question-item:nth-child(${currentQuestionIndex + 1})`);
+            if (nextQuestion) {
+                nextQuestion.classList.remove('hidden');
+                nextQuestion.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        updateProgress();
+        updateNavButtons();
+    }
+}
+
+        // 네비게이션 버튼 업데이트 함수
+        function updateNavButtons() {
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const submitBtn = document.getElementById('submit-btn');
+
+            prevBtn.disabled = currentSubCategoryIndex === 0;
+            nextBtn.disabled = currentSubCategoryIndex === questions.length - 1;
+
+            if (nextBtn.disabled) {
+                nextBtn.classList.add('hidden');
+                submitBtn.classList.remove('hidden');
+            } else {
+                nextBtn.classList.remove('hidden');
+                submitBtn.classList.add('hidden');
+            }
+        }
+
+        // 이벤트 리스너 설정
+document.getElementById('prev-btn').addEventListener('click', () => {
+    if (currentSubCategoryIndex > 0) {
+        currentSubCategoryIndex--;
+        currentQuestionIndex = 0;
+        displayQuestions();
+    }
+});
+
+document.getElementById('next-btn').addEventListener('click', () => {
+    const currentSubCategory = questions[currentSubCategoryIndex];
+    const allAnswered = currentSubCategory.every((_, index) =>
+        answers[currentSubCategoryIndex] && answers[currentSubCategoryIndex][index]
+    );
+
+    if (!allAnswered) {
+        alert('체크하지 않은 설문이 있습니다.');
+        return;
+    }
+
+    if (currentSubCategoryIndex < questions.length - 1) {
+        currentSubCategoryIndex++;
+        currentQuestionIndex = 0;
+        displayQuestions();
+    }
+});
+    document.getElementById('submit-btn').addEventListener('click', () => {
+        // 여기에 제출 로직을 구현하세요
+        console.log('제출된 답변:', answers);
+        alert('설문이 제출되었습니다.');
+    });
+
+    // 초기화 및 첫 질문 표시
+    function init() {
+        const parsedData = parseCSV(csvData);
+        questions = groupQuestions(parsedData);
+        displayQuestions();
+    }
+
+//진행상황
+function updateProgress() {
+    const currentSubCategory = questions[currentSubCategoryIndex];
+    const subCategoryAnswered = (answers[currentSubCategoryIndex] || []).filter(Boolean).length;
+    const subCategoryTotal = currentSubCategory.length;
+
+    const totalAnswered = answers.flat().filter(Boolean).length;
+    const totalQuestions = questions.flat().length;
+
+    const subCategoryProgress = (subCategoryAnswered / subCategoryTotal) * 100;
+    const totalProgress = (totalAnswered / totalQuestions) * 100;
+
+    document.getElementById('sub-category-progress').textContent =
+        `현재 세부 역량: ${subCategoryAnswered}/${subCategoryTotal}`;
+    document.getElementById('sub-category-progress-bar').style.width = `${subCategoryProgress}%`;
+
+    document.getElementById('total-progress').textContent =
+        `전체 진행: ${totalAnswered}/${totalQuestions} (${totalProgress.toFixed(1)}%)`;
+    document.getElementById('total-progress-bar').style.width = `${totalProgress}%`;
+}
+
+    init();
+</script>
+</body>
+</html>
